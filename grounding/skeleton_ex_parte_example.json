@@ -1,0 +1,190 @@
+{
+  "_note": "STRUCTURAL SKELETON ONLY — procedural-gate / ex-parte branch. Every value is a placeholder, NOT a real fact. It exists to demonstrate the shape of the harder branch (gate-first ordering, the four ontology extensions, an ACTIVE co-borrower). Do not copy any value from this file into a real graph.",
+  "graph_metadata": {
+    "matter": "<lender legal name> v. <borrower name> & <co-borrower name>",
+    "case_reference": "<institution case no.>; <contract no.>",
+    "loan_account": "<loan account no.>",
+    "ontology": "Loan Arbitration Graph Grounding — 13 base node types + extensions (InterimMeasure, ProceduralOrder, AttachedAsset, ThirdParty ACTIVE in this branch)",
+    "purpose": "Grounding data for Claimant's Rejoinder",
+    "drafting_party": "Claimant (<lender legal name>)",
+    "extracted_on": "<YYYY-MM-DD>",
+    "filing_formality": "informal_representations | formal_SOD | no_filing",
+    "proceeding_mode": "ex_parte",
+    "procedural_posture": "PROCEDURAL-GATE. Respondent defaulted / filing not joined; the tribunal proceeded ex-parte. The Rejoinder LEADS with the maintainability / ex-parte gate; merits are pleaded only in the alternative and without prejudice. Branch = Procedural-gate (driven by proceeding_mode = ex_parte).",
+    "active_flags": [
+      "<regenerate per case — e.g. arbitrator_identity_chain_gap>",
+      "<e.g. impossible_respondent_timeline>"
+    ]
+  },
+  "nodes": [
+    {
+      "id": "LOAN_<acct>",
+      "label": "Loan",
+      "props": {
+        "loanAccountNo": "<loan account no.>",
+        "sanctionAmount": "<number or NOT IN RECORD>",
+        "secured": "<true|false>",
+        "totalOutstanding_operative": "<number or NOT IN RECORD>",
+        "totalOutstanding_operative_basis": "<as-on date + source>",
+        "provenance": ["<DOC> p.<n>"]
+      },
+      "flags": []
+    },
+    {
+      "id": "CRED_<lender>",
+      "label": "SecuredCreditor",
+      "props": {
+        "creditorName": "<lender legal name>",
+        "nameChange": "<former name or null>",
+        "nameChangeProof": "<IN RECORD (order ref) | NOT IN RECORD>",
+        "provenance": ["<DOC> p.<n>"]
+      },
+      "flags": []
+    },
+    {
+      "id": "BORR_<name>",
+      "label": "Borrower",
+      "props": {
+        "borrowerName": "<borrower name>",
+        "address": "<address>",
+        "phone": "[SENSITIVE — withheld from generative context]",
+        "provenance": ["<DOC> p.<n>"]
+      },
+      "flags": []
+    },
+    {
+      "id": "COBORR_<name>",
+      "label": "CoBorrower",
+      "props": {
+        "present": true,
+        "coBorrowerName": "<co-borrower name>",
+        "corroboration": "Named as co-applicant in the SOA/agreement (NOT merely '& anr' in the caption).",
+        "provenance": ["<DOC> p.<n>"]
+      },
+      "suppressed": false,
+      "flags": []
+    },
+    {
+      "id": "ARB_<caseno>",
+      "label": "ArbitrationProceeding",
+      "props": {
+        "caseNo": "<arbitration case no.>",
+        "arbitrationInstitution": "<institution>",
+        "arbitratorName": "<arbitrator named in notice/SOC>",
+        "arbitratorIdentityConsistent": "<true|false>",
+        "appointmentMechanism": "<read the actual mechanism — it varies>",
+        "seat": "<seat per agreement clause>",
+        "costAllocation": "<per agreement clause>",
+        "provenance": ["<DOC> p.<n>"]
+      },
+      "flags": [
+        "<e.g. arbitrator_identity_chain_gap: notice names X, interim order signed by Y>"
+      ]
+    },
+    {
+      "id": "IM_<ref>",
+      "label": "InterimMeasure",
+      "_extension": true,
+      "props": {
+        "measureType": "Section 17 (or Section 9) interim order",
+        "orderDate": "<YYYY-MM-DD>",
+        "reliefGranted": "<freeze / injunction described>",
+        "provenance": ["<DOC> p.<n>"]
+      },
+      "flags": []
+    },
+    {
+      "id": "PO_<ref>",
+      "label": "ProceduralOrder",
+      "_extension": true,
+      "props": {
+        "orderType": "ex-parte order | cost order | adjournment-with-consequence",
+        "orderDate": "<YYYY-MM-DD>",
+        "basis": "<basis recited by the tribunal>",
+        "claimantUse": "<how the Claimant relies on it in the Rejoinder>",
+        "provenance": ["<DOC> p.<n>"]
+      },
+      "flags": []
+    },
+    {
+      "id": "AA_<ref>",
+      "label": "AttachedAsset",
+      "_extension": true,
+      "props": {
+        "assetType": "bank account frozen by the interim measure (distinct from loan collateral)",
+        "identifier": "[SENSITIVE — withheld from generative context]",
+        "provenance": ["<DOC> p.<n>"]
+      },
+      "flags": []
+    },
+    {
+      "id": "TP_<garnishee>",
+      "label": "ThirdParty",
+      "_extension": true,
+      "props": {
+        "name": "<garnishee bank / non-party served>",
+        "role": "garnishee",
+        "provenance": ["<DOC> p.<n>"]
+      },
+      "flags": []
+    },
+    {
+      "id": "GUAR_NONE",
+      "label": "Guarantor",
+      "props": { "present": false, "note": "<NA per SOA, or describe the guarantor>" },
+      "suppressed": true
+    },
+    {
+      "id": "ASSET_NONE",
+      "label": "SecuredAsset",
+      "props": { "present": false, "note": "<unsecured per SOA, or describe collateral>" },
+      "suppressed": true
+    }
+  ],
+  "relationships": [
+    { "from": "LOAN_<acct>", "type": "PROVIDED_BY", "to": "CRED_<lender>" },
+    { "from": "LOAN_<acct>", "type": "TAKEN_BY", "to": "BORR_<name>" },
+    { "from": "LOAN_<acct>", "type": "HAS_CO_BORROWER", "to": "COBORR_<name>" },
+    { "from": "LOAN_<acct>", "type": "HAS_ARBITRATION_PROCEEDING", "to": "ARB_<caseno>" },
+    { "from": "ARB_<caseno>", "type": "HAS_INTERIM_MEASURE", "to": "IM_<ref>" },
+    { "from": "ARB_<caseno>", "type": "HAS_PROCEDURAL_ORDER", "to": "PO_<ref>" },
+    { "from": "IM_<ref>", "type": "ATTACHES_ASSET", "to": "AA_<ref>" },
+    { "from": "AA_<ref>", "type": "HELD_BY_GARNISHEE", "to": "TP_<garnishee>" }
+  ],
+  "issues_to_relevance_map": [
+    {
+      "issue": "Maintainability / ex-parte gate (LEAD ISSUE in this branch) — <plea + para no.>",
+      "claimant_thrust": "Respondent was duly served and defaulted; the ex-parte proceeding and interim order are validly maintainable",
+      "rebuttal_nodes": [
+        { "id": "PO_<ref>", "props_used": ["orderType", "orderDate", "basis", "claimantUse"], "provenance": ["<DOC> p.<n>"] },
+        { "id": "IM_<ref>", "props_used": ["measureType", "orderDate", "reliefGranted"], "provenance": ["<DOC> p.<n>"] }
+      ],
+      "flags": [],
+      "posture_tag": "gate_threshold"
+    },
+    {
+      "issue": "Quantum / merits — <plea + para no.>",
+      "claimant_thrust": "Pleaded only in the alternative, without prejudice to the gate",
+      "rebuttal_nodes": [
+        { "id": "LOAN_<acct>", "props_used": ["totalOutstanding_operative", "totalOutstanding_operative_basis"], "provenance": ["<DOC> p.<n>"] }
+      ],
+      "flags": [],
+      "posture_tag": "alternative_without_prejudice"
+    },
+    {
+      "issue": "Joint-and-several liability of the co-borrower — <plea + para no.>",
+      "claimant_thrust": "Co-borrower is jointly and severally liable on the facility",
+      "rebuttal_nodes": [
+        { "id": "COBORR_<name>", "props_used": ["coBorrowerName", "corroboration"], "provenance": ["<DOC> p.<n>"] }
+      ],
+      "flags": [],
+      "posture_tag": "alternative_without_prejudice"
+    }
+  ],
+  "coverage_check": {
+    "dominant_battlegrounds": ["ex-parte gate", "interim-measure / freeze justification", "co-borrower liability", "quantum (thin)"],
+    "each_backed_by_provenance": true,
+    "extension_nodes_flagged": "InterimMeasure, ProceduralOrder, AttachedAsset, ThirdParty all carry _extension: true",
+    "empties_walled_off": ["GUAR_NONE", "ASSET_NONE"]
+  }
+}
