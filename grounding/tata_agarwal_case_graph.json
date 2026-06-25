@@ -1,0 +1,293 @@
+{
+  "graph_metadata": {
+    "matter": "Tata Capital Limited v. Deepak Agarwal",
+    "case_reference": "Case No. TCL//18923//2026; Contract No. TCFBL0370000012362883",
+    "loan_account": "TCFBL0370000012362883",
+    "ontology": "Loan Arbitration Graph Grounding — 13 base node types + 4 extensions (all DARK in this instance)",
+    "purpose": "Grounding data for Claimant's Rejoinder to the Respondent's reply",
+    "drafting_party": "Claimant (Tata Capital Limited)",
+    "extracted_on": "2026-06-24",
+    "role": "Held-out fourth instance (skill-creator validation). Second occurrence of the informal x inter_partes -> Merits cell; surfaces the co-borrower-caption mistake and the different-lis / accelerated-quantum refinements.",
+    "filing_formality": "informal_representations",
+    "proceeding_mode": "inter_partes",
+    "procedural_posture": "MERITS. Respondent engaged via an advocate's letter (Emkay Solutions / Adv. Vaibhav Dwivedi, 25-Mar-2026) captioned a REPLY to a Section 25 Payment & Settlement Systems Act, 2007 demand notice — NOT to the SOC or the arbitration commencement notice. Pleads medical hardship, sole-provider status, seeks settlement, asserts a right to deactivate the ECS/NACH mandate. Tribunal proceeded inter-partes; Claimant filed a merits rejoinder (16-Jun-2026) engaging the reply. Branch = Merits (driven by proceeding_mode). Same matrix cell as Tata-Gupta.",
+    "extensions_status": {
+      "InterimMeasure": "dark — no S.17/S.9 order",
+      "ProceduralOrder": "dark — no ex-parte/cost order",
+      "AttachedAsset": "dark — no freeze",
+      "ThirdParty": "dark — no garnishee"
+    },
+    "active_flags": [
+      "phantom_co_respondent_in_caption",
+      "reply_addresses_different_lis",
+      "arbitration_clause_number_mismatch",
+      "criminal_threat_boilerplate_on_civil_default",
+      "loan_characterization_mixed_business_personal",
+      "quantum_unrebutted_lis_not_joined"
+    ],
+    "positive_controls": [
+      "name_change_proof IN RECORD (NCLT order 24-Nov-2023) — the name_change_proof_not_in_record flag correctly does NOT fire here, contrast Gupta",
+      "all four extension triggers correctly dark (negative control holds a second time)"
+    ]
+  },
+
+  "nodes": [
+    {
+      "id": "LOAN_TCFBL0370000012362883",
+      "label": "Loan",
+      "props": {
+        "loanAccountNo": "TCFBL0370000012362883",
+        "agreementId": "12362883",
+        "sanctionDate": "2023-10-05",
+        "sanctionAmount": 172000,
+        "disbursedAmount": 172000,
+        "netToCustomer": 162038,
+        "product": "Business Loan Unsec — Prospect PLPA SE OTF STP",
+        "secured": false,
+        "purposeCharacterisation": "Mixed — 'Business/Personal' (LRN para 2; SOC para 5)",
+        "tenureMonths": 48,
+        "installmentAmount": 5513,
+        "rateOfInterest": "23.00% p.a. (fixed)",
+        "defaultAdditionalInterest": "36% p.a. (3% per month, agreement Loan-details section)",
+        "instalmentsPaid": 24,
+        "instalmentsPending": 4,
+        "instalmentsPendingAmount": 22049,
+        "futureInstalments": 20,
+        "futureInstalmentsAmount": 109711,
+        "delinquentSince": "2025-11-03",
+        "assetClassification": "Sub-standard 1",
+        "totalOutstanding_operative": 116748,
+        "totalOutstanding_operative_basis": "Stable across SOA (13-Feb), commencement notice and SOC; rejoinder pleads no different figure. As-on 13-Feb-2026.",
+        "quantumComposition": {
+          "currentOverdue": 25422,
+          "penalCharge": 249,
+          "interestAccruedAtTermination": 578,
+          "balancePrincipal_accelerated": 90499,
+          "total": 116748,
+          "note": "Only 25,422 is overdue; the 90,499 balance principal is the unmatured body brought forward by RECALL/ACCELERATION. The claim is the whole accelerated outstanding, not the overdue installments — defends against a 'only ~5 EMIs overdue' objection.",
+          "provenance": ["SOA p.1"]
+        },
+        "quantumProgression": [
+          { "stage": "recall (LRN)", "amount": 113021, "asOn": "2026-01-16", "provenance": ["LRN p.2"] },
+          { "stage": "statement of account", "amount": 116748, "asOn": "2026-02-13", "provenance": ["SOA p.1"] },
+          { "stage": "commencement notice", "amount": 116748, "asOn": "2026-03-03", "provenance": ["CL p.1"] },
+          { "stage": "statement of claim (OPERATIVE)", "amount": 116748, "asOn": "2026-02-13", "provenance": ["SOC p.2"] }
+        ],
+        "provenance": ["SOA p.1", "SOC p.1-2", "Agreement p.1"]
+      },
+      "flags": [
+        "quantum_unrebutted_lis_not_joined: the respondent's reply answered a S.25 PSS Act demand, not the SOC; the Rs. 1,16,748 claim and its acceleration are NOT traversed and stand unrebutted on the record.",
+        "recall_vs_claim_progression: LRN recall 1,13,021 (as-on 16-Jan) vs claim 1,16,748 (as-on 13-Feb) — one further cycle of installment + penal + interest; explainable stage progression."
+      ]
+    },
+    {
+      "id": "CRED_TATA",
+      "label": "SecuredCreditor",
+      "props": {
+        "creditorName": "Tata Capital Limited",
+        "nameChange": "Formerly Tata Capital Financial Services Ltd",
+        "nameChangeMechanism": "NCLT-sanctioned Scheme of Arrangement merging TCFSL + Tata Cleantech Capital Ltd into TCL",
+        "nameChangeProof": "IN RECORD — NCLT order dated 24-Nov-2023, effective 01-Jan-2024",
+        "entityType": "Non-Banking Financial Company, Companies Act 1956, RBI-registered",
+        "registeredOffice": "11th Floor, Tower A, Peninsula Business Park, Lower Parel, Mumbai 400013",
+        "provenance": ["SOC p.1", "LRN p.1", "COMM p.1"]
+      },
+      "flags": [
+        "name_change_proof_in_record (POSITIVE CONTROL): unlike Gupta, the merger is evidenced (NCLT order pleaded and listed as document #9). The name_change_proof_not_in_record flag correctly does NOT fire."
+      ]
+    },
+    {
+      "id": "BORR_DEEPAK_A",
+      "label": "Borrower",
+      "props": {
+        "borrowerName": "Deepak Agarwal",
+        "address": "F-9 Friends Garden, Sikandra, Agra, Uttar Pradesh 282007",
+        "phone": "[SENSITIVE — withheld from generative context]",
+        "email": "[SENSITIVE — withheld from generative context]",
+        "repaymentBankAccount": "[SENSITIVE — withheld] (J&K Bank, NACH)",
+        "provenance": ["SOC p.1", "SOA p.1", "Agreement"]
+      },
+      "flags": []
+    },
+    {
+      "id": "COBORR_NONE",
+      "label": "CoBorrower",
+      "props": {
+        "present": false,
+        "note": "SOA 'Co-Applicant Name: NA'; agreement single borrower. The rejoinder cause-title reads 'Deepak Agarwal & othr.' — a PHANTOM second respondent contradicted by the SOA. Caption boilerplate, NOT a co-borrower. Per the corroboration rule, CoBorrower stays suppressed.",
+        "provenance": ["SOA p.1", "Rejoinder p.1"]
+      },
+      "suppressed": true,
+      "flags": [
+        "phantom_co_respondent_in_caption: '& othr' in the rejoinder caption with no corroborating co-applicant in the SOA/agreement. Do not activate CoBorrower on the caption alone."
+      ]
+    },
+    {
+      "id": "GUAR_NONE",
+      "label": "Guarantor",
+      "props": {
+        "present": false,
+        "note": "SOA 'Guarantor Name: NA'.",
+        "provenance": ["SOA p.1"]
+      },
+      "suppressed": true
+    },
+    {
+      "id": "ASSET_NONE",
+      "label": "SecuredAsset",
+      "props": {
+        "present": false,
+        "note": "UNSECURED business loan. SOA: 'There is no Collateral Information.' No hypothecation. (Consistent: the LRN does not demand asset surrender — contrast a vehicle loan.)",
+        "provenance": ["SOA p.2", "Agreement p.1"]
+      },
+      "suppressed": true
+    },
+    {
+      "id": "COMM_LRN",
+      "label": "Communication",
+      "props": {
+        "type": "Loan Recall Notice",
+        "date": "2026-01-21",
+        "speedPostRef": "EA436435274IN",
+        "issuedBy": "Adv. Kavita D. Totkekar (for claimant)",
+        "content": "Recites the NCLT merger (24-Nov-2023, effective 01-Jan-2024); recalls loan; Rs. 1,13,021 due as-on 16-Jan-2026; 7-day demand; invokes arbitration",
+        "provenance": ["LRN p.1-2"]
+      },
+      "flags": [
+        "criminal_threat_boilerplate_on_civil_default: LRN paras 5 & 8 allege 'fraud', 'cheating and criminal breach of trust' and threaten a criminal complaint under BNS 2023 ss. 316/322/61/3(5) on a simple unsecured business-loan default — over-reach; the recall-notice boilerplate does not fit a civil default. Drafter should not rely on the criminal characterisation in the arbitration."
+      ]
+    },
+    {
+      "id": "COMM_COMMENCEMENT",
+      "label": "Communication",
+      "props": {
+        "type": "Commencement of Arbitration notice",
+        "date": "2026-03-03",
+        "ref": "TCL_COM_0005051430_02_2026",
+        "speedPostRef": "EA434018960IN",
+        "content": "Lists 11 institutions; 7-day nomination / deemed acceptance; outstanding stated Rs. 1,16,748",
+        "provenance": ["CL p.1-2"]
+      }
+    },
+    {
+      "id": "COMM_S25_NOT_IN_RECORD",
+      "label": "Communication",
+      "props": {
+        "type": "Section 25 PSS Act demand notice (referenced, not produced)",
+        "present": false,
+        "note": "The respondent's reply is captioned a response to a 'Notice of Demand under Section 25 of the Payment and Settlement Systems Act, 2007'. That demand notice is NOT in the bundle. Its existence is inferred only from the reply's caption.",
+        "provenance": ["Reply p.1 (caption)"]
+      },
+      "suppressed": true
+    },
+    {
+      "id": "COMM_REPLY",
+      "label": "Communication",
+      "props": {
+        "type": "Respondent's reply (informal — advocate's letter)",
+        "date": "2026-03-25",
+        "issuedBy": "Adv. Vaibhav Dwivedi, Emkay Solutions, Noida",
+        "addressedTo": "Tata Capital (Mumbai Fort address / customercare email)",
+        "answersWhichLis": "A Section 25 PSS Act demand notice — NOT the SOC or the arbitration commencement notice",
+        "contentions": [
+          "Admits availing the business loan; bona fide intention to repay",
+          "Pleads medical condition and severe financial difficulty; sole provider for family",
+          "Seeks a mutually beneficial settlement of the outstanding balance",
+          "Asserts a right to deactivate the ECS/NACH mandate due to financial crunch, citing RBI guidelines",
+          "Asks the claimant not to visit residence/office"
+        ],
+        "provenance": ["Reply p.1-3"]
+      },
+      "flags": [
+        "reply_addresses_different_lis: this reply answers a S.25 PSS Act demand, so neither it nor the rejoinder is joined to the SOC's claim. The SOC quantum/acceleration is therefore unrebutted; the rejoinder is in substance litigating the ECS-mandate / hardship points raised against a different notice."
+      ]
+    },
+    {
+      "id": "ARB_TCL18923",
+      "label": "ArbitrationProceeding",
+      "props": {
+        "caseNo": "TCL/18923/2026",
+        "arbitrationInstitution": "Centre for Alternative Dispute Resolution Excellence (CADRE)",
+        "arbitratorName": "Suganya Sudhakar, Advocate, Chennai",
+        "arbitratorIdentityConsistent": true,
+        "appointmentMechanism": "Claimant's unilateral 11-institution list; deemed acceptance on borrower silence within 7 days; institution appoints",
+        "seat": "Chennai (Agreement Clause 10: 'seat of arbitration for all purposes shall be at Chennai'; SOC para 12)",
+        "costAllocation": "Borne by the Borrower (Agreement Clause 10: 'The cost of arbitration shall be borne by the Borrower')",
+        "language": "English; document-only, electronic mode",
+        "clauseReferenceInSOC": "Clause 9",
+        "clauseReferenceInAgreement": "Clause 10",
+        "provenance": ["SOC p.1-2", "Rejoinder p.1", "Agreement p.3-4", "COMM p.1-2"]
+      },
+      "flags": [
+        "arbitration_clause_number_mismatch: SOC (paras 10 & 12) pleads the arbitration clause as 'clause 9'; the agreement's arbitration clause is Clause 10 (clause 9 is 'Other Conditions'). Correct the reference.",
+        "unilateral_appointment_available_unchallenged: the unilateral-list + deemed-acceptance mechanism is a potential independence challenge; the respondent did not raise it."
+      ]
+    },
+    {
+      "id": "S138_NONE",
+      "label": "Section138Proceeding",
+      "props": {
+        "present": false,
+        "note": "No actual S.138 NI Act proceeding. The rejoinder invokes S.138 NI Act and S.25 PSS Act only rhetorically, as consequences of ECS deactivation. Ontology holds; node stays suppressed.",
+        "provenance": ["Rejoinder p.2"]
+      },
+      "suppressed": true
+    },
+    {
+      "id": "SARFAESI_NONE",
+      "label": "SARFAESIProceeding",
+      "props": { "present": false, "note": "N/A — unsecured loan." },
+      "suppressed": true
+    }
+  ],
+
+  "relationships": [
+    { "from": "LOAN_TCFBL0370000012362883", "type": "PROVIDED_BY", "to": "CRED_TATA" },
+    { "from": "LOAN_TCFBL0370000012362883", "type": "TAKEN_BY", "to": "BORR_DEEPAK_A" },
+    { "from": "LOAN_TCFBL0370000012362883", "type": "HAS_COMMUNICATION", "to": "COMM_LRN" },
+    { "from": "LOAN_TCFBL0370000012362883", "type": "HAS_COMMUNICATION", "to": "COMM_COMMENCEMENT" },
+    { "from": "LOAN_TCFBL0370000012362883", "type": "HAS_COMMUNICATION", "to": "COMM_REPLY" },
+    { "from": "LOAN_TCFBL0370000012362883", "type": "HAS_ARBITRATION_PROCEEDING", "to": "ARB_TCL18923" },
+    { "from": "BORR_DEEPAK_A", "type": "INVOLVED_IN_LEGAL_PROCEEDING", "to": "ARB_TCL18923" }
+  ],
+
+  "issues_to_relevance_map": [
+    {
+      "issue": "Quantum / acceleration — claim Rs. 1,16,748 (SOC paras 9-11). NOTE: not traversed by the reply.",
+      "claimant_thrust": "On recall, the whole accelerated outstanding is due, not just the overdue EMIs; composition shown",
+      "rebuttal_nodes": [{ "id": "LOAN_TCFBL0370000012362883", "props_used": ["quantumComposition", "quantumProgression", "delinquentSince"], "provenance": ["SOA p.1", "SOC p.2"] }],
+      "flags": ["quantum_unrebutted_lis_not_joined"],
+      "posture_tag": "merits"
+    },
+    {
+      "issue": "Medical hardship / sole-provider / settlement request (Reply)",
+      "claimant_thrust": "Hardship does not legally extinguish a commercial debt; early good conduct does not absolve",
+      "rebuttal_nodes": [{ "id": "LOAN_TCFBL0370000012362883", "props_used": ["instalmentsPaid", "delinquentSince"], "provenance": ["SOA p.1", "Rejoinder p.1"] }],
+      "flags": [],
+      "posture_tag": "merits"
+    },
+    {
+      "issue": "ECS/NACH mandate deactivation asserted as a borrower right under RBI guidelines (Reply)",
+      "claimant_thrust": "An ECS/NACH mandate is a binding authorisation to service an active debt; unilateral deactivation to evade EMIs is a deliberate default (S.25 PSS Act; S.138 NI Act consequences)",
+      "rebuttal_nodes": [{ "id": "ARB_TCL18923", "props_used": ["costAllocation"], "provenance": ["Rejoinder p.2", "Agreement p.4"] }],
+      "flags": [],
+      "posture_tag": "merits"
+    },
+    {
+      "issue": "Foundation / locus — claimant identity post name-change",
+      "claimant_thrust": "TCL is the merged transferee of TCFSL per the NCLT order; locus established",
+      "rebuttal_nodes": [{ "id": "CRED_TATA", "props_used": ["creditorName", "nameChange", "nameChangeProof"], "provenance": ["SOC p.1", "LRN p.1"] }],
+      "flags": [],
+      "posture_tag": "merits"
+    }
+  ],
+
+  "coverage_check": {
+    "dominant_battlegrounds": ["quantum/acceleration (UNREBUTTED — reply not joined)", "medical hardship", "ECS-deactivation legality", "name-change locus (RESOLVED)"],
+    "each_backed_by_provenance": true,
+    "name_change_locus": "Backed — NCLT order dated 24-Nov-2023 (positive control; flag does not fire)",
+    "lis_warning": "reply_addresses_different_lis — do not treat the SOC merits as joined; the quantum claim is unrebutted on the record.",
+    "extension_nodes_flagged": "n/a — all four extensions dark (negative control)",
+    "empties_walled_off": ["COBORR_NONE", "GUAR_NONE", "ASSET_NONE", "S138_NONE", "SARFAESI_NONE", "COMM_S25_NOT_IN_RECORD"]
+  }
+}
