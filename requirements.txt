@@ -3,3 +3,5 @@ openai>=1.68,<3
 python-dotenv>=1.0,<2
 pypdf>=5.3,<7
 python-docx>=1.1,<2
+neo4j>=5,<6
+neo4j-viz>=1,<2

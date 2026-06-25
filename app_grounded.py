@@ -31,6 +31,7 @@ from grounding_pipeline import (
     stream_grounded_rejoinder,
     suppressed_facts,
 )
+import neo4j_graph as ng
 
 load_dotenv()
 
@@ -62,6 +63,82 @@ def _run_grounded(client, model, documents, instructions, max_tokens, use_exampl
         placeholder.markdown("".join(chunks))
 
     return "".join(chunks).strip(), graph, packs, posture
+
+
+def _render_artifacts(results: dict) -> None:
+    graph = results.get("graph") or {}
+    st.markdown("**Grounding artifacts**")
+    with st.expander("Posture (Step 0)", expanded=False):
+        st.json(results.get("posture"))
+    with st.expander("Active flags (Step 6)"):
+        st.json(graph.get("graph_metadata", {}).get("active_flags", []))
+    with st.expander("Per-issue context packs (Steps 4-5, 7)"):
+        st.json(results.get("packs"))
+    with st.expander("Coverage check (Step 8)"):
+        st.json(results.get("coverage"))
+    with st.expander("Full extracted graph (Step 1)"):
+        st.json(graph)
+
+
+def _render_columns_static(results: dict) -> None:
+    """Re-render the two drafts from session_state (keeps answers intact on reruns)."""
+    col_o, col_g = st.columns(2)
+    with col_o:
+        st.subheader("① Original (raw document dump)")
+        if results.get("original_text"):
+            st.markdown(results["original_text"])
+            st.download_button(
+                "Download original (.md)", results["original_text"].encode("utf-8"),
+                "claimant_rejoinder.md", "text/markdown",
+                use_container_width=True, key="dl_o",
+            )
+        elif results.get("original_error"):
+            st.error(f"Original draft failed: {results['original_error']}")
+    with col_g:
+        st.subheader("② Graph-grounded (skill applied)")
+        if results.get("grounded_text"):
+            st.markdown(results["grounded_text"])
+            st.download_button(
+                "Download grounded (.md)", results["grounded_text"].encode("utf-8"),
+                "claimant_rejoinder_grounded.md", "text/markdown",
+                use_container_width=True, key="dl_g",
+            )
+            _render_artifacts(results)
+        elif results.get("grounded_error"):
+            st.error(f"Grounded draft failed: {results['grounded_error']}")
+
+
+def _render_graph_section(results: dict) -> None:
+    """Full-width interactive graph, read back live from Neo4j."""
+    st.divider()
+    st.subheader("③ Case graph (live from Neo4j)")
+    if not ng.neo4j_configured():
+        st.info(
+            "Neo4j is not configured — add NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD "
+            "and NEO4J_DATABASE to `.env` to auto-load and visualize the graph."
+        )
+        return
+    if results.get("neo4j_error"):
+        st.warning(f"Graph could not be loaded into Neo4j: {results['neo4j_error']}")
+        return
+    sg = results.get("subgraph")
+    if not sg:
+        return
+    show_suppressed = st.toggle(
+        "Show suppressed (NA) nodes", value=False, key="show_suppressed_toggle"
+    )
+    counts = sg.get("counts", {})
+    st.caption(
+        f"Case `{sg['case_id']}` — {counts.get('nodes', '?')} nodes / "
+        f"{counts.get('relationships', '?')} relationships in Neo4j (flushed before load)."
+    )
+    try:
+        import streamlit.components.v1 as components
+
+        html = ng.render_case_html(sg["case_id"], show_suppressed)
+        components.html(html, height=680, scrolling=False)
+    except Exception as exc:
+        st.error(f"Could not render the graph: {exc}")
 
 
 def main() -> None:
@@ -133,97 +210,101 @@ def main() -> None:
             "Draft both Rejoinders", type="primary", use_container_width=True
         )
 
-    if not submitted:
-        return
+    if submitted:
+        api_key = os.getenv("OPENAI_API_KEY", "").strip()
+        model = os.getenv("OPENAI_MODEL", "").strip()
+        if not claim_file or not defence_file:
+            st.error("Please upload both the Statement of Claim and the Statement of Defence / Reply.")
+        elif not api_key or not model:
+            st.error("Set OPENAI_API_KEY and OPENAI_MODEL in .env, then restart the app.")
+        else:
+            try:
+                with st.spinner("Reading the uploaded record…"):
+                    documents = _extract_all(claim_file, defence_file, supporting_files or [])
+            except Exception as exc:
+                st.error(f"Could not read the uploads: {exc}")
+                documents = None
 
-    api_key = os.getenv("OPENAI_API_KEY", "").strip()
-    model = os.getenv("OPENAI_MODEL", "").strip()
-    if not claim_file or not defence_file:
-        st.error("Please upload both the Statement of Claim and the Statement of Defence / Reply.")
-        return
-    if not api_key or not model:
-        st.error("Set OPENAI_API_KEY and OPENAI_MODEL in .env, then restart the app.")
-        return
+            if documents is not None:
+                client = OpenAI(api_key=api_key)
+                instructions = drafting_instructions
+                max_tokens = int(max_output_tokens)
+                results: dict = {}
 
-    try:
-        with st.spinner("Reading the uploaded record…"):
-            documents = _extract_all(claim_file, defence_file, supporting_files or [])
-    except Exception as exc:
-        st.error(f"Could not read the uploads: {exc}")
-        return
+                col_original, col_grounded = st.columns(2)
+                with col_original:
+                    st.subheader("① Original (raw document dump)")
+                    original_placeholder = st.empty()
+                with col_grounded:
+                    st.subheader("② Graph-grounded (skill applied)")
+                    grounded_placeholder = st.empty()
 
-    client = OpenAI(api_key=api_key)
-    instructions = drafting_instructions
-    max_tokens = int(max_output_tokens)
+                # --- Original draft (live stream) ---------------------------
+                with col_original:
+                    try:
+                        with st.status("Drafting (original)…", expanded=False) as status:
+                            results["original_text"] = _run_original(
+                                client, model, documents, instructions, max_tokens,
+                                original_placeholder,
+                            )
+                            status.update(label="Original draft complete", state="complete")
+                        if results.get("original_text"):
+                            st.download_button(
+                                "Download original (.md)",
+                                results["original_text"].encode("utf-8"),
+                                "claimant_rejoinder.md", "text/markdown",
+                                use_container_width=True, key="dl_o_live",
+                            )
+                    except Exception as exc:
+                        results["original_error"] = str(exc)
+                        st.error(f"Original draft failed: {exc}")
 
-    col_original, col_grounded = st.columns(2)
+                # --- Grounded draft (live stream) --------------------------
+                with col_grounded:
+                    try:
+                        with st.status("Extracting graph & drafting (grounded)…", expanded=False) as status:
+                            grounded_text, graph, packs, posture = _run_grounded(
+                                client, model, documents, instructions, max_tokens,
+                                use_example, grounded_placeholder,
+                            )
+                            status.update(label="Grounded draft complete", state="complete")
+                        results.update({
+                            "grounded_text": grounded_text, "graph": graph,
+                            "packs": packs, "posture": posture,
+                            "coverage": coverage_report(graph, packs),
+                        })
+                        if grounded_text:
+                            st.download_button(
+                                "Download grounded (.md)",
+                                grounded_text.encode("utf-8"),
+                                "claimant_rejoinder_grounded.md", "text/markdown",
+                                use_container_width=True, key="dl_g_live",
+                            )
+                        _render_artifacts(results)
+                    except Exception as exc:
+                        results["grounded_error"] = str(exc)
+                        st.error(f"Grounded draft failed: {exc}")
 
-    with col_original:
-        st.subheader("① Original (raw document dump)")
-        original_placeholder = st.empty()
-    with col_grounded:
-        st.subheader("② Graph-grounded (skill applied)")
-        grounded_placeholder = st.empty()
+                # --- Auto-ingest into Neo4j (flush-all, then current case) --
+                if results.get("graph") and ng.neo4j_configured():
+                    try:
+                        with st.spinner("Flushing Neo4j and loading the case graph…"):
+                            cid = ng.case_id_of(results["graph"])
+                            counts = ng.ingest_current(results["graph"], cid)
+                        results["subgraph"] = {"case_id": cid, "counts": counts}
+                    except Exception as exc:
+                        results["neo4j_error"] = str(exc)
 
-    # --- Original draft -----------------------------------------------------
-    original_text = ""
-    with col_original:
-        try:
-            with st.status("Drafting (original)…", expanded=False) as status:
-                original_text = _run_original(
-                    client, model, documents, instructions, max_tokens, original_placeholder
-                )
-                status.update(label="Original draft complete", state="complete")
-            if original_text:
-                st.download_button(
-                    "Download original (.md)",
-                    data=original_text.encode("utf-8"),
-                    file_name="claimant_rejoinder.md",
-                    mime="text/markdown",
-                    use_container_width=True,
-                )
-        except Exception as exc:
-            st.error(f"Original draft failed: {exc}")
+                st.session_state["results"] = results
+                _render_graph_section(results)
+                return
 
-    # --- Grounded draft -----------------------------------------------------
-    with col_grounded:
-        try:
-            with st.status("Extracting graph & drafting (grounded)…", expanded=False) as status:
-                grounded_text, graph, packs, posture = _run_grounded(
-                    client, model, documents, instructions, max_tokens, use_example,
-                    grounded_placeholder,
-                )
-                status.update(label="Grounded draft complete", state="complete")
-
-            if grounded_text:
-                st.download_button(
-                    "Download grounded (.md)",
-                    data=grounded_text.encode("utf-8"),
-                    file_name="claimant_rejoinder_grounded.md",
-                    mime="text/markdown",
-                    use_container_width=True,
-                )
-
-            st.markdown("**Grounding artifacts**")
-            with st.expander("Posture (Step 0)", expanded=True):
-                st.json(posture)
-            with st.expander("Active flags (Step 6)"):
-                st.json(graph.get("graph_metadata", {}).get("active_flags", []))
-            with st.expander("Per-issue context packs (Steps 4-5, 7)"):
-                st.json(packs)
-            with st.expander("Coverage check (Step 8)"):
-                st.json(coverage_report(graph, packs))
-            with st.expander("Full extracted graph (Step 1)"):
-                st.json(graph)
-                st.download_button(
-                    "Download graph (.json)",
-                    data=json.dumps(graph, ensure_ascii=False, indent=2).encode("utf-8"),
-                    file_name="loan_case_graph.json",
-                    mime="application/json",
-                    use_container_width=True,
-                )
-        except Exception as exc:
-            st.error(f"Grounded draft failed: {exc}")
+    # Non-submit reruns (e.g. interacting with the graph) re-render from state
+    # so the drafted rejoinders stay on screen.
+    results = st.session_state.get("results")
+    if results:
+        _render_columns_static(results)
+        _render_graph_section(results)
 
 
 if __name__ == "__main__":
