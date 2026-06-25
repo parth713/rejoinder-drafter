@@ -6,4 +6,3 @@ __pycache__/
 .streamlit/secrets.toml
 
 # Real client case graph — contains borrower PII; supply locally, never commit.
-grounding/tata_agarwal_case_graph.json
